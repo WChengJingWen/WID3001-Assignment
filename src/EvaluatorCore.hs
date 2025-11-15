@@ -9,8 +9,6 @@ import AST (Expr(..))
 applyOp :: (Double -> Double -> Double) -> Expr -> Expr -> Double
 applyOp op a b = op (eval a) (eval b)
 
--- IMPROVEMENT 2: Pure recursive functions with pattern matching
--- Each case is a pure function mapping inputs to outputs
 eval :: Expr -> Double
 eval (Num n)   = n
 eval (Add a b) = applyOp (+) a b

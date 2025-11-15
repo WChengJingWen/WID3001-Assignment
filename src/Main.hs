@@ -8,25 +8,21 @@ import Tokenizer (tokenize)
 import Parser    (parseExpr)
 import EvaluatorCore (eval)
 
--- IMPROVEMENT 3: Function Composition - Extract I/O logic
--- Separates pure computation from side effects 
+-- DESIGN IMPROVEMENT 3: Separation of I/O and Pure Logic
+-- I/O function 1: Get secret modifier
 getSecretModifier :: IO Double
 getSecretModifier = 
   catch (getEnv "SECRET_MODIFIER")
         (\(_ :: SomeException) -> return "1.0")
+  -- DESIGN IMPROVEMENT 4: Monadic Composition
+  -- Uses monadic bind 
   >>= return . maybe 1.0 id . (readMaybe :: String -> Maybe Double)
 
--- IMPROVEMENT 3: Pure helper functions for validation
--- Demonstrates immutability and pure functions (no side effects)
+-- Pure function 1 : Validation logic separated
 isInvalidResult :: Double -> Bool
 isInvalidResult val = isNaN val || isInfinite val
 
-countParens :: String -> [String] -> (Int, Int)
-countParens target tokens = 
-  (length (filter (==target) tokens), length (filter (==target) tokens))
-
--- IMPROVEMENT 2: Extract parse error diagnosis as pure function
--- Follows FP principle: separate pure logic from I/O
+-- Pure function 2: Error diagnosis
 diagnoseParseError :: [String] -> String
 diagnoseParseError tokens =
   let opens  = length (filter (=="(") tokens)
@@ -35,8 +31,7 @@ diagnoseParseError tokens =
      then "Parse error: missing ')'"
      else "Parse error"
 
--- IMPROVEMENT 3: Monadic composition with do-notation
--- Clean sequencing of I/O actions while maintaining pure core logic
+-- I/O function 2: Process expression
 processExpression :: String -> Double -> IO ()
 processExpression input secret =
   case tokenize input of
@@ -45,18 +40,19 @@ processExpression input secret =
       case parseExpr tokens of
         Just (expr, []) -> do
           let val = eval expr
-          if isInvalidResult val
+          if isInvalidResult val  -- call pure function 1
             then putStrLn "Math error: division by zero"
             else print (val * secret)
         Just (_, leftover) ->
           putStrLn $ "Parse error: unexpected tokens " ++ show leftover
-        Nothing -> putStrLn (diagnoseParseError tokens)
+        Nothing -> putStrLn (diagnoseParseError tokens) -- call pure function 2
 
--- Main entry point - cleaner separation of concerns
+-- DESIGN IMPROVEMENT 5: Pattern Matching with Guards
 main :: IO ()
 main = do
   secret <- getSecretModifier
   args <- getArgs
   if null args
-    then putStrLn "Usage: evaluator \"expression\""
-    else processExpression (head args) secret
+    case args of
+      []    -> putStrLn "Usage: evaluator \"expression\""
+      (x:_) -> processExpression x secret

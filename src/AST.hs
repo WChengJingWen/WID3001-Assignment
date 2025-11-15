@@ -2,6 +2,7 @@ module AST
   ( Expr(..)
   ) where
 
+-- Expression data type
 data Expr
   = Num Double
   | Add Expr Expr

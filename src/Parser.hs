@@ -9,9 +9,8 @@ import AST (Expr(..))
 parseExpr :: [String] -> Maybe (Expr, [String])
 parseExpr = parseAddSub
 
--- IMPROVEMENT 1: Higher-Order Functions
--- Generic left-associative operator parser (eliminates duplication)
--- Demonstrates HOFs as a way to capture common patterns 
+-- DESIGN IMPROVEMENT 1: Higher-Order Functions
+-- Remove redundant code with a single reusable function
 parseBinOp :: (Expr -> Expr -> Expr)           -- constructor
            -> [(String, Expr -> Expr -> Expr)]  -- operators
            -> ([String] -> Maybe (Expr, [String])) -- next parser
