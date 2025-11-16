@@ -52,7 +52,6 @@ main :: IO ()
 main = do
   secret <- getSecretModifier
   args <- getArgs
-  if null args
-    case args of
-      []    -> putStrLn "Usage: evaluator \"expression\""
-      (x:_) -> processExpression x secret
+  case args of
+    []    -> putStrLn "Usage: evaluator \"expression\""
+    (x:_) -> processExpression x secret
