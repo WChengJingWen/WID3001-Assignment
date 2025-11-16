@@ -4,21 +4,30 @@ module Tokenizer
 
 import Data.Char (isDigit, isSpace)
 
--- Strict digit-dot-digit numbers; friendly errors via Either
+-- DESIGN IMPROVEMENT 2: Pure Function & Function Composition
+-- Pure function 1: Count dots 
+countDots :: String -> Int
+countDots = length . filter (== '.')
+
+-- Pure function 2: Check dot position 
+hasInvalidDotPosition :: String -> Bool
+hasInvalidDotPosition num = 
+  not (null num) && (head num == '.' || last num == '.')
+
+-- Pure function 3: Validate number (compuses pure function 1 & 2)
+isValidNumber :: String -> Bool
+isValidNumber num =
+  let dots = countDots num
+  in dots == 0 || (dots == 1 && not (hasInvalidDotPosition num))
+
 tokenize :: String -> Either String [String]
 tokenize [] = Right []
 tokenize (c:cs)
   | isSpace c         = tokenize cs
   | c `elem` "+-*/()" = fmap ([c]:) (tokenize cs)
   | isDigit c || c == '.' =
-      let (num, rest)   = span (\x -> isDigit x || x == '.') (c:cs)
-          dots          = length (filter (== '.') num)
-          startsWithDot = not (null num) && head num == '.'
-          endsWithDot   = not (null num) && last num == '.'
-      in
-        if dots == 0
-           then fmap (num:) (tokenize rest)
-           else if dots == 1 && not startsWithDot && not endsWithDot
-                  then fmap (num:) (tokenize rest)
-                  else Left ("Invalid number: " ++ num)
+      let (num, rest) = span (\x -> isDigit x || x == '.') (c:cs)
+      in if isValidNumber num
+         then fmap (num:) (tokenize rest)
+         else Left ("Invalid number: " ++ num)
   | otherwise         = Left ("Invalid character: " ++ [c])
