@@ -1,15 +1,11 @@
 module Main where
 
 import Test.HUnit
-import Data.List (isInfixOf)  -- Add this import for substring checking
+import Data.List (isInfixOf)  
 import AST (Expr(..))
 import Tokenizer (tokenize)
 import Parser (parseExpr)
 import EvaluatorCore (eval)
-
--- =============================================================================
--- TOKENIZER TESTS
--- =============================================================================
 
 -- Test 1: Basic tokenization of simple expression
 testTokenizeSimple :: Test
@@ -41,7 +37,7 @@ testTokenizeMultipleDots = TestCase $ do
   let result = tokenize "3.1.4"
   case result of
     Left msg -> assertBool "Should reject multiple dots" 
-                           ("Invalid number" `isInfixOf` msg)  -- ✅ Fixed: use isInfixOf
+                           ("Invalid number" `isInfixOf` msg)  
     Right _ -> assertFailure "Should have failed on '3.1.4'"
 
 -- Test 5: EDGE CASE - Invalid number starting with dot (fixed bug)
@@ -50,7 +46,7 @@ testTokenizeLeadingDot = TestCase $ do
   let result = tokenize ".5 + 2"
   case result of
     Left msg -> assertBool "Should reject leading dot" 
-                           ("Invalid number" `isInfixOf` msg)  -- ✅ Fixed: use isInfixOf
+                           ("Invalid number" `isInfixOf` msg)  
     Right _ -> assertFailure "Should have failed on '.5'"
 
 -- Test 6: EDGE CASE - Invalid number ending with dot (fixed bug)
@@ -59,7 +55,7 @@ testTokenizeTrailingDot = TestCase $ do
   let result = tokenize "5. + 2"
   case result of
     Left msg -> assertBool "Should reject trailing dot" 
-                           ("Invalid number" `isInfixOf` msg)  -- ✅ Fixed: use isInfixOf
+                           ("Invalid number" `isInfixOf` msg)  
     Right _ -> assertFailure "Should have failed on '5.'"
 
 -- Test 7: Valid decimal number
@@ -76,12 +72,8 @@ testTokenizeUnknownFunction = TestCase $ do
   let result = tokenize "cos(1)"
   case result of
     Left msg -> assertBool "Should reject unknown function" 
-                           ("Unknown" `isInfixOf` msg)  -- ✅ Fixed: use isInfixOf
+                           ("Unknown" `isInfixOf` msg)  
     Right _ -> assertFailure "Should have failed on 'cos'"
-
--- =============================================================================
--- PARSER TESTS
--- =============================================================================
 
 -- Test 9: Parse simple addition
 testParseAddition :: Test
@@ -95,7 +87,7 @@ testParseAddition = TestCase $ do
 -- Test 10: Parse power expression (new feature, right-associative)
 testParsePower :: Test
 testParsePower = TestCase $ do
-  let tokens = ["2", "^", "3", "^", "2"]  -- Should be 2^(3^2) = 2^9 = 512
+  let tokens = ["2", "^", "3", "^", "2"] 
       result = parseExpr tokens
   case result of
     Just (Pow (Num 2.0) (Pow (Num 3.0) (Num 2.0)), []) -> return ()
@@ -134,8 +126,8 @@ testParseMissingParen = TestCase $ do
   let tokens = ["(", "2", "+", "3"]
       result = parseExpr tokens
   case result of
-    Nothing -> return ()  -- Should fail to parse
-    Just (_, leftover) | not (null leftover) -> return ()  -- Or have leftover
+    Nothing -> return ()  
+    Just (_, leftover) | not (null leftover) -> return ()  
     _ -> assertFailure "Should fail on missing parenthesis"
 
 -- Test 15: Parse complex nested expression
@@ -146,10 +138,6 @@ testParseNestedExpression = TestCase $ do
   case result of
     Just (Mul (Add (Num 2.0) (Num 3.0)) (Num 4.0), []) -> return ()
     _ -> assertFailure $ "Failed to parse nested expression: " ++ show result
-
--- =============================================================================
--- EVALUATOR TESTS
--- =============================================================================
 
 -- Test 16: Evaluate basic arithmetic
 testEvalBasic :: Test
@@ -215,10 +203,6 @@ testEvalUnaryMinus = TestCase $ do
       result = eval expr
   assertEqual "-5 should equal -5" (-5.0) result
 
--- =============================================================================
--- INTEGRATION TESTS (Full Pipeline)
--- =============================================================================
-
 -- Test 25: Full pipeline - tokenize, parse, evaluate
 testFullPipeline :: Test
 testFullPipeline = TestCase $ do
@@ -235,7 +219,7 @@ testFullPipeline = TestCase $ do
 -- Test 26: Full pipeline with new features
 testFullPipelineWithFeatures :: Test
 testFullPipelineWithFeatures = TestCase $ do
-  let input = "abs(-5) + 2^3"  -- Should be 5 + 8 = 13
+  let input = "abs(-5) + 2^3"  
   case tokenize input of
     Left err -> assertFailure $ "Tokenization failed: " ++ err
     Right tokens -> case parseExpr tokens of
@@ -248,7 +232,7 @@ testFullPipelineWithFeatures = TestCase $ do
 -- Test 27: Full pipeline - edge case with parentheses
 testFullPipelineParentheses :: Test
 testFullPipelineParentheses = TestCase $ do
-  let input = "(2 + 3) * (4 - 1)"  -- Should be 5 * 3 = 15
+  let input = "(2 + 3) * (4 - 1)"  
   case tokenize input of
     Left err -> assertFailure $ "Tokenization failed: " ++ err
     Right tokens -> case parseExpr tokens of
@@ -261,7 +245,7 @@ testFullPipelineParentheses = TestCase $ do
 -- Test 28: Full pipeline - sqrt with power
 testFullPipelineSqrtPower :: Test
 testFullPipelineSqrtPower = TestCase $ do
-  let input = "sqrt(16) ^ 2"  -- Should be 4 ^ 2 = 16
+  let input = "sqrt(16) ^ 2" 
   case tokenize input of
     Left err -> assertFailure $ "Tokenization failed: " ++ err
     Right tokens -> case parseExpr tokens of
@@ -270,10 +254,6 @@ testFullPipelineSqrtPower = TestCase $ do
         let result = eval expr
         assertEqual "sqrt(16)^2 should equal 16" 16.0 result
       Just (_, leftover) -> assertFailure $ "Unexpected tokens: " ++ show leftover
-
--- =============================================================================
--- TEST SUITE
--- =============================================================================
 
 tests :: Test
 tests = TestList
