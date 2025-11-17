@@ -3,6 +3,6 @@
 ## How to run the test cases?
 ```bash
 cd src
-ghc -package HUnit -isrc Tests.hs -o tests
-./tests
+ghci Tests.hs
+main
 ```
