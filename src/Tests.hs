@@ -1,7 +1,6 @@
 module Main where
 
-import Test.HUnit
-import Data.List (isInfixOf)  
+import Test.HUnit  
 import AST (Expr(..))
 import Tokenizer (tokenize)
 import Parser (parseExpr)
@@ -35,28 +34,27 @@ testTokenizePower = TestCase $ do
 testTokenizeMultipleDots :: Test
 testTokenizeMultipleDots = TestCase $ do
   let result = tokenize "3.1.4"
-  case result of
-    Left msg -> assertBool "Should reject multiple dots" 
-                           ("Invalid number" `isInfixOf` msg)  
-    Right _ -> assertFailure "Should have failed on '3.1.4'"
+  assertEqual "Should reject multiple dots" 
+              (Left "Invalid number: 3.1.4")  
+              result
+
 
 -- Test 5: EDGE CASE - Invalid number starting with dot (fixed bug)
 testTokenizeLeadingDot :: Test
 testTokenizeLeadingDot = TestCase $ do
   let result = tokenize ".5 + 2"
-  case result of
-    Left msg -> assertBool "Should reject leading dot" 
-                           ("Invalid number" `isInfixOf` msg)  
-    Right _ -> assertFailure "Should have failed on '.5'"
+  assertEqual "Should reject leading dot" 
+              (Left "Invalid number: .5" )
+              result  
+
 
 -- Test 6: EDGE CASE - Invalid number ending with dot (fixed bug)
 testTokenizeTrailingDot :: Test
 testTokenizeTrailingDot = TestCase $ do
   let result = tokenize "5. + 2"
-  case result of
-    Left msg -> assertBool "Should reject trailing dot" 
-                           ("Invalid number" `isInfixOf` msg)  
-    Right _ -> assertFailure "Should have failed on '5.'"
+  assertEqual "Should reject trailing dot" 
+              (Left "Invalid number: 5.") 
+              result
 
 -- Test 7: Valid decimal number
 testTokenizeValidDecimal :: Test
@@ -70,10 +68,9 @@ testTokenizeValidDecimal = TestCase $ do
 testTokenizeUnknownFunction :: Test
 testTokenizeUnknownFunction = TestCase $ do
   let result = tokenize "cos(1)"
-  case result of
-    Left msg -> assertBool "Should reject unknown function" 
-                           ("Unknown" `isInfixOf` msg)  
-    Right _ -> assertFailure "Should have failed on 'cos'"
+  assertEqual "Should reject unknown function" 
+              (Left "Unknown token or functions:cos")
+              result  
 
 -- Test 9: Parse simple addition
 testParseAddition :: Test
