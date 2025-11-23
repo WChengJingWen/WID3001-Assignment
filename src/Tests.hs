@@ -181,14 +181,13 @@ testEvalDivisionByZero = TestCase $ do
 -- Test 22: Evaluate right-associative power
 testEvalRightAssocPower :: Test
 testEvalRightAssocPower = TestCase $ do
-  let expr = Pow (Num 2.0) (Pow (Num 3.0) (Num 2.0))  -- 2^(3^2) = 2^9 = 512
+  let expr = Pow (Num 2.0) (Pow (Num 3.0) (Num 2.0))  
       result = eval expr
   assertEqual "2^3^2 should equal 512 (right-assoc)" 512.0 result
 
 -- Test 23: Evaluate complex expression
 testEvalComplexExpression :: Test
 testEvalComplexExpression = TestCase $ do
-  -- (2 + 3) * 4 - 5 = 20 - 5 = 15
   let expr = Sub (Mul (Add (Num 2.0) (Num 3.0)) (Num 4.0)) (Num 5.0)
       result = eval expr
   assertEqual "Complex expression should evaluate correctly" 15.0 result
