@@ -22,11 +22,12 @@ README.md                 -- this file
 ---
 
 ## How to Run the Program?
-
-
-
-
-
+```bash
+cd src
+ghci
+:load Main.hs
+main "2+5"
+```
 ## Test Suite
 
 The `Tests.hs` file includes **28 HUnit tests**.
